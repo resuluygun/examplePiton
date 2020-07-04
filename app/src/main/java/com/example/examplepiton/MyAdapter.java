@@ -9,7 +9,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.gms.tasks.Task;
 
 import java.util.ArrayList;
 
@@ -22,25 +21,20 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final int TASK_ITEM=0;
     private static final int HEADER_ITEM=1;
 
+    private final ItemClickListener myOnClickHandler;
+
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public MyAdapter(ArrayList<Object> myDataset) {
+    public MyAdapter(ArrayList<Object> myDataset, ItemClickListener onClickHandler) {
         mDataSet = myDataset;
+        myOnClickHandler = onClickHandler;
     }
 
-
-
-
+    
     //find list_item and send to MyViewHolder
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-
-        // create a new view
-//        View view =  LayoutInflater.from(parent.getContext())
-//                .inflate(R.layout.list_item, parent, false);
-//        MyViewHolder viewHolder = new MyViewHolder(view);
-//        return viewHolder;
 
         View view;
         if (viewType == TASK_ITEM ) { // for task layout
@@ -57,7 +51,7 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
 
     // Task's layout
-    class TaskViewHolder extends RecyclerView.ViewHolder{
+    class TaskViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         public TextView textViewTaskString, textViewTaskTime, textViewTaskStartTime, textViewTaskEndTime;
 
         public TaskViewHolder(@NonNull View itemView) {
@@ -66,17 +60,36 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             textViewTaskTime = (TextView) itemView.findViewById(R.id.text_view_task_time);
             textViewTaskStartTime = (TextView) itemView.findViewById(R.id.text_view_task_start_time);
             textViewTaskEndTime = (TextView) itemView.findViewById(R.id.text_view_task_end_time);
+
+            itemView.setOnClickListener(this);
         }
 
         private void setTaskDetails(Object task){
             TaskPlan currentTask=(TaskPlan) task;
+            String startDate = currentTask.getmStartDate().toString().substring(0,11) + currentTask.getmStartDate().toString().substring(30,34) ;
+            String endDate = currentTask.getmEndDate().toString().substring(0,11) +  currentTask.getmEndDate().toString().substring(30,34);
 
             textViewTaskString.setText(currentTask.getmTaskString());
             textViewTaskTime.setText(currentTask.getmTaskTime());
-            textViewTaskStartTime.setText(currentTask.getmStartDate().toString());
-            textViewTaskEndTime.setText(currentTask.getmEndDate().toString());
+            textViewTaskStartTime.setText(startDate);
+            textViewTaskEndTime.setText(endDate);
+        }
+
+        @Override
+        public void onClick(View view) {
+
+            int adapterPosition = getAdapterPosition();
+            myOnClickHandler.onClick(mDataSet.get(adapterPosition), adapterPosition);
+
+
+
         }
     }
+
+    public interface ItemClickListener {
+        void onClick(Object data, Integer position);
+    }
+
 
     //Header's layout
     class HeaderViewHolder extends  RecyclerView.ViewHolder{

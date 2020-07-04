@@ -1,16 +1,21 @@
 package com.example.examplepiton;
 
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.firestore.CollectionReference;
@@ -21,13 +26,13 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MyAdapter.ItemClickListener  {
 
     // TAG for MainActivity class.
     private static String TAG=MainActivity.class.getSimpleName();
+
 
     private RecyclerView recyclerView;
     private RecyclerView.Adapter mAdapter;
@@ -39,9 +44,6 @@ public class MainActivity extends AppCompatActivity {
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     CollectionReference collectionReference;
 
-    //private ArrayList<TaskPlan> taskArrayList = new ArrayList<>();
-
-    private String[] stringList = {"A", "B", "C", "D", "E","..."};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
 
         // specify an adapter (see also next example)
         //mAdapter = new MyAdapter(taskArrayList);
-        mAdapter = new MyAdapter(objectTaskList);
+        mAdapter = new MyAdapter(objectTaskList, this);
 
         recyclerView.setAdapter(mAdapter);
 
@@ -81,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
 
 
     public void getDataFromDB(){
@@ -111,9 +114,7 @@ public class MainActivity extends AppCompatActivity {
 
                                 objectTaskList.add(new String(time));
                                 counter = 0;
-                                //iterate each clothes and add it to the obj list as ordered
                                 for(TaskPlan t: taskArrayList){
-                                    //Log.d(TAG, "TaskPlanTime  "+ t.getmTaskTime());
 
                                     if(t.getmTaskTime().equals(time)){
                                         objectTaskList.add(t);
@@ -121,15 +122,8 @@ public class MainActivity extends AppCompatActivity {
                                     }
 
                                 }
-                                //if category don't have any clothes, delete it from list
-                                //that will appear on listview
                                 if(counter==0) objectTaskList.remove(objectTaskList.size()-1);
                             }
-                         //   Log.d(TAG, "objectTaskList--->  "+ objectTaskList);
-//                            for(Object item : objectTaskList ){
-//                                Log.d(TAG, "objectTaskList item--->  "+ item);
-//                            }
-
                             mAdapter.notifyDataSetChanged();
                         } else {
                             Log.w(TAG, "Error getting documents.", task.getException());
@@ -141,4 +135,54 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+
+    @Override
+    public void onClick(final Object data, final Integer position) {
+        final TaskPlan tempTask = (TaskPlan) data;
+
+        Log.d(TAG, "DELETE ıd"+tempTask.getmId() );
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Do you want to delete this task?")
+                .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+
+                        db.collection("tasks").document("userId").
+                                collection("task_list").document(tempTask.getmId())
+                                .delete()
+                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void aVoid) {
+                                        Log.d(TAG, "DELETE SUCCESS");
+
+                                        objectTaskList.remove(data);
+
+                                        mAdapter.notifyItemRemoved(position);
+                                        mAdapter.notifyDataSetChanged();
+
+                                    }
+                                })
+                                .addOnFailureListener(new OnFailureListener() {
+
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        Log.d(TAG, "DELETE FAILURE");
+
+
+                                    }
+                                });
+
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // User cancelled the dialog
+                    }
+                });
+
+        builder.create();
+        builder.show();
+
+    }
+
 }

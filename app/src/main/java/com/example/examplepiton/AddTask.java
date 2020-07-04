@@ -97,7 +97,7 @@ public class AddTask extends AppCompatActivity implements DatePickerFragment.OnD
                     Map<String, Object> task = new HashMap<>();
                     task.put("taskString", taskString);
                     task.put("taskTime", taskTime);
-                    task.put("id",DBOperations.documentReference.getId());
+                    task.put("id",documentReference.getId());
                     task.put("startDate", startDate);
                     task.put("endDate", endDate);
 
@@ -160,28 +160,6 @@ public class AddTask extends AppCompatActivity implements DatePickerFragment.OnD
     }
 
 
-
-
-    /*public void onRadioButtonClicked(View view) {
-        // Is the button now checked?
-        boolean checked = ((RadioButton) view).isChecked();
-
-        // Check which radio button was clicked
-        switch(view.getId()) {
-            case R.id.radio_daily:
-                if (checked) Log.v(TAG, "daily");
-                taskTime = "daily";
-            break;
-            case R.id.radio_weeklkly:
-                if (checked) Log.v(TAG, "weekly");
-                taskTime = "weekly";
-                    break;
-            case R.id.radio_monthly:
-                if (checked) Log.v(TAG, "monthly");
-                taskTime = "monthly";
-                    break;
-        }
-    }*/
 
     @Override
     public void onDataPass(String key, Date date) {
