@@ -104,6 +104,7 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
         return new DatePickerDialog(getActivity(), this, year, month, day);
     }
 
+    //when the date is selected
     @Override
     public void onDateSet(DatePicker datePicker, int year, int month, int day) {
 
@@ -124,6 +125,7 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
 
     }
 
+    // pass data to Activity
     public interface OnDataPass {
         public void onDataPass(String key, Date date);
     }

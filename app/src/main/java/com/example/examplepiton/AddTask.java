@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.DialogFragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -14,6 +15,7 @@ import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.Date;
@@ -54,7 +56,7 @@ public class AddTask extends AppCompatActivity implements DatePickerFragment.OnD
 
     private View.OnClickListener saveTaskToDB = new View.OnClickListener(){
         @Override
-        public void onClick(View view) {
+        public void onClick(final View view) {
             taskString = textInputLayout.getEditText().getText().toString().trim();
             Log.v(TAG,"taskString" + taskString);
             Log.v(TAG,"startDate" + startDate);
@@ -62,11 +64,17 @@ public class AddTask extends AppCompatActivity implements DatePickerFragment.OnD
 
             if(taskString.isEmpty() || startDate==null || endDate == null ){
                 Log.v(TAG,"The task or time can't be empty");
+                Snackbar.make(view, "Please fill all fields.", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
 
             }
             else{
 
-                if(startDate.after(endDate)) Log.v(TAG,"wrong");
+                if(startDate.after(endDate)) {
+
+                    Snackbar.make(view, "Please choose valid date", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                }
                 else{
 
                     long diffInMillies = Math.abs(endDate.getTime() - startDate.getTime());
@@ -82,18 +90,24 @@ public class AddTask extends AppCompatActivity implements DatePickerFragment.OnD
                     task.put("taskString", taskString);
                     task.put("taskTime", taskTime);
                     task.put("id",DBOperations.documentReference.getId());
+                    task.put("startDate", startDate);
+                    task.put("endDate", endDate);
 
 
                     DBOperations.documentReference.set(task)
                             .addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
                                 public void onSuccess(Void aVoid) {
+                                    Intent intent = new Intent(AddTask.this, MainActivity.class);
+                                    startActivity(intent);
                                 Log.v(TAG,"SUCCESS SAVE");
                                 };
                             })
                             .addOnFailureListener(new OnFailureListener() {
                                 @Override
                                 public void onFailure(@NonNull Exception e) {
+                                    Snackbar.make(view, "There's a problem in server. Please try again.", Snackbar.LENGTH_LONG)
+                                            .setAction("Action", null).show();
                                     Log.v(TAG,"failure SAVE");
                                 }
                             });
