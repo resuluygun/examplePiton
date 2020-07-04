@@ -17,6 +17,9 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -34,11 +37,18 @@ public class AddTask extends AppCompatActivity implements DatePickerFragment.OnD
     TextView startTextView, endTextView;
     Date startDate, endDate;
 
+    FirebaseFirestore db;
+    DocumentReference documentReference;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_task);
+
+        db = FirebaseFirestore.getInstance();
+         documentReference = db.collection("tasks").document("userId").
+                collection("task_list").document();
 
         startTextView = findViewById(R.id.text_input_start_date);
         endTextView = findViewById(R.id.text_input_end_date);
@@ -58,9 +68,7 @@ public class AddTask extends AppCompatActivity implements DatePickerFragment.OnD
         @Override
         public void onClick(final View view) {
             taskString = textInputLayout.getEditText().getText().toString().trim();
-            Log.v(TAG,"taskString" + taskString);
-            Log.v(TAG,"startDate" + startDate);
-            Log.v(TAG,"endDate" + endDate);
+
 
             if(taskString.isEmpty() || startDate==null || endDate == null ){
                 Log.v(TAG,"The task or time can't be empty");
@@ -94,13 +102,13 @@ public class AddTask extends AppCompatActivity implements DatePickerFragment.OnD
                     task.put("endDate", endDate);
 
 
-                    DBOperations.documentReference.set(task)
+                    documentReference.set(task)
                             .addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
                                 public void onSuccess(Void aVoid) {
                                     Intent intent = new Intent(AddTask.this, MainActivity.class);
                                     startActivity(intent);
-                                Log.v(TAG,"SUCCESS SAVE");
+                                    Log.v(TAG,"SUCCESS SAVE");
                                 };
                             })
                             .addOnFailureListener(new OnFailureListener() {
