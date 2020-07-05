@@ -14,24 +14,24 @@ import java.util.ArrayList;
 
 public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-
-    //private String[] mDataSet;
-    //private ArrayList<TaskPlan>  mDataSet;
     private ArrayList<Object>  mDataSet;
+
+    //Determine the layouts according this Integer
     private static final int TASK_ITEM=0;
     private static final int HEADER_ITEM=1;
 
+    //instance of ItemClickListener
     private final ItemClickListener myOnClickHandler;
 
 
-    // Provide a suitable constructor (depends on the kind of dataset)
+    //Adapter constructor
     public MyAdapter(ArrayList<Object> myDataset, ItemClickListener onClickHandler) {
         mDataSet = myDataset;
         myOnClickHandler = onClickHandler;
     }
 
     
-    //find list_item and send to MyViewHolder
+    //
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -53,7 +53,7 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     // Task's layout
     class TaskViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         public TextView textViewTaskString, textViewTaskTime, textViewTaskStartTime, textViewTaskEndTime;
-
+        //constructor
         public TaskViewHolder(@NonNull View itemView) {
             super(itemView);
             textViewTaskString = (TextView) itemView.findViewById(R.id.text_view_task_string);
@@ -63,7 +63,7 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
             itemView.setOnClickListener(this);
         }
-
+        //set fields
         private void setTaskDetails(Object task){
             TaskPlan currentTask=(TaskPlan) task;
             String startDate = currentTask.getmStartDate().toString().substring(0,11) + currentTask.getmStartDate().toString().substring(30,34) ;
@@ -74,18 +74,15 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             textViewTaskStartTime.setText(startDate);
             textViewTaskEndTime.setText(endDate);
         }
-
+        //Show dialog if user click to task in the RecyclerView/MainActivity
         @Override
         public void onClick(View view) {
-
             int adapterPosition = getAdapterPosition();
             myOnClickHandler.onClick(mDataSet.get(adapterPosition), adapterPosition);
-
-
-
         }
     }
 
+    //Pass the clicked object to MainActiviy from adapter
     public interface ItemClickListener {
         void onClick(Object data, Integer position);
     }
@@ -109,20 +106,15 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-
-        Log.v("Adapter", ""+position);
+        // set the layout according object's type(Header or Task)
         if(getItemViewType(position) == TASK_ITEM){
-            Log.v("ViewType", "TASK");
 
             ((TaskViewHolder) holder).setTaskDetails(mDataSet.get(position));
         }
         else{
-            Log.v("ViewType", "HEADER");
 
             ((HeaderViewHolder) holder).setHeaderetails(mDataSet.get(position));
-
         }
-
     }
 
     @Override
@@ -130,7 +122,6 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         if(mDataSet.get(position) instanceof  TaskPlan) return TASK_ITEM;
         else return  HEADER_ITEM;
     }
-
 
     public Object getItem(int position) {
         return mDataSet.get(position);

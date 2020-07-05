@@ -88,7 +88,6 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
         // Inflate the layout for this fragment
 
         key = getArguments().getString("key");
-        //Log.v("fragment",getArguments().getString("key"));
         return inflater.inflate(R.layout.fragment_date_picker, container, false);
     }
 
@@ -104,10 +103,9 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
         return new DatePickerDialog(getActivity(), this, year, month, day);
     }
 
-    //when the date is selected
+    //when the date is select selected
     @Override
     public void onDateSet(DatePicker datePicker, int year, int month, int day) {
-
         String pattern = "dd/MM/yyyy";
 
         SimpleDateFormat format = new SimpleDateFormat(pattern);
@@ -120,8 +118,6 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
         }
 
         passData(key, date);
-
-        Log.v("fragment", day+"/"+month+"/"+year);
 
     }
 

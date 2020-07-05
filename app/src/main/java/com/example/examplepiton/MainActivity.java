@@ -34,13 +34,17 @@ public class MainActivity extends AppCompatActivity implements MyAdapter.ItemCli
     private static String TAG=MainActivity.class.getSimpleName();
 
 
+    //Recyclerview
     private RecyclerView recyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager layoutManager;
 
+    //Store data came from db
     private ArrayList<TaskPlan> taskArrayList = new ArrayList<>();
+    //Adapter data provider
     private ArrayList<Object> objectTaskList = new ArrayList<>();
 
+    //Db
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     CollectionReference collectionReference;
 
@@ -53,17 +57,15 @@ public class MainActivity extends AppCompatActivity implements MyAdapter.ItemCli
 
         collectionReference = db.collection("tasks").document("userId").
                 collection("task_list");
-        recyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
-        // use this setting to improve performance if you know that changes
-        // in content do not change the layout size of the RecyclerView
-        recyclerView.setHasFixedSize(true);
 
+
+        //Recyclerview initilaze
+        recyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
+        recyclerView.setHasFixedSize(true);
         // use a linear layout manager
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
 
-        // specify an adapter (see also next example)
-        //mAdapter = new MyAdapter(taskArrayList);
         mAdapter = new MyAdapter(objectTaskList, this);
 
         recyclerView.setAdapter(mAdapter);
@@ -72,7 +74,7 @@ public class MainActivity extends AppCompatActivity implements MyAdapter.ItemCli
 
 
 
-        // under this lineeeeeee
+        //Create floating action button and set onClicklistener
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -87,9 +89,13 @@ public class MainActivity extends AppCompatActivity implements MyAdapter.ItemCli
 
 
     public void getDataFromDB(){
+        //clear the lists for prevent to duplicate
         taskArrayList.clear();
         objectTaskList.clear();
 
+        //get data from tasks/userId/task_list
+            // --this userId static. you can get data dynamically with mAuth.getUserId() if you us authentication
+        //task_list is a collection and has document/documents
         collectionReference.get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
@@ -98,30 +104,28 @@ public class MainActivity extends AppCompatActivity implements MyAdapter.ItemCli
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
 
-
+                                //add every task to taskArrayList
                                 taskArrayList.add(new TaskPlan(document.get("id").toString(), document.get("taskString").toString(),
                                         document.get("taskTime").toString(), document.getTimestamp("startDate").toDate(),
                                         document.getTimestamp("endDate").toDate()));
-                                //Log.d(TAG, "TempDocument "+ taskArrayList);
                             }
+                            //Time tags
                             List<String> times = new ArrayList<>(Arrays.asList("Daily","Weekly","Monthly"));
-                            Log.d(TAG, "TaskArrayList  "+ taskArrayList);
 
                             //counter for delete a category header that don't have any items
                             int counter;
-                            for(String time : times){
-                                Log.d(TAG, "Time  "+ time);
-
+                            for(String time : times){ // look all tags in list
+                                //add the time objectTaskList as a String Object
                                 objectTaskList.add(new String(time));
                                 counter = 0;
-                                for(TaskPlan t: taskArrayList){
-
+                                for(TaskPlan t: taskArrayList){ // look all tasks list
+                                    //if taskTime matches time add to objectTaskList
                                     if(t.getmTaskTime().equals(time)){
                                         objectTaskList.add(t);
                                         counter++;
                                     }
-
                                 }
+                                // remove "time" from objectTaskList if counter==0(it means there's no task from this "time")
                                 if(counter==0) objectTaskList.remove(objectTaskList.size()-1);
                             }
                             mAdapter.notifyDataSetChanged();
@@ -131,9 +135,6 @@ public class MainActivity extends AppCompatActivity implements MyAdapter.ItemCli
 
                     }
                 });
-
-
-
     }
 
     @Override
